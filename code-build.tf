@@ -241,3 +241,21 @@ EOT
     Name = "sari-code-build"
   })
 }
+
+// GitHub
+
+resource aws_codebuild_webhook this {
+  project_name = aws_codebuild_project.this.name
+
+  filter_group {
+    filter {
+      type    = "EVENT"
+      pattern = "PUSH"
+    }
+
+    filter {
+      type    = "HEAD_REF"
+      pattern = "master"
+    }
+  }
+}
