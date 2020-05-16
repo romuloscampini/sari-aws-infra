@@ -11,6 +11,9 @@ variable "trusted_src_ip" {
   type = string
 }
 
+variable bh_admin_username {}
+variable bh_proxy_username {}
+
 resource aws_key_pair bh {
   key_name   = "bh-key"
   public_key = file("admin_id_rsa.pub")
@@ -26,6 +29,24 @@ resource aws_ssm_parameter bh-pass {
   name  = "sari.bh_admin_key_passphrase"
   type  = "SecureString"
   value = var.bh_admin_key_passphrase
+}
+
+resource aws_ssm_parameter bh-hostname {
+  name  = "sari.bh_hostname"
+  type  = "String"
+  value = aws_instance.bh.private_ip
+}
+
+resource aws_ssm_parameter bh-admin-username {
+  name  = "sari.bh_admin_username"
+  type  = "String"
+  value = var.bh_admin_username
+}
+
+resource aws_ssm_parameter bh-proxy-username {
+  name  = "sari.bh_proxy_username"
+  type  = "String"
+  value = var.bh_proxy_username
 }
 
 resource aws_security_group bh {

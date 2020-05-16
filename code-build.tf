@@ -208,8 +208,11 @@ env:
   parameter-store:
     PULUMI_CONFIG_PASSPHRASE: "sari.pulumi_config_passphrase"
     OKTA_API_TOKEN: "sari.okta_api_token"
+    BH_HOSTNAME: "sari.bh_hostname"
+    BH_ADMIN_USERNAME: "sari.bh_admin_username"
     BH_ADMIN_PRIVATE_KEY: "sari.bh_admin_private_key"
     BH_ADMIN_KEY_PASSPHRASE: "sari.bh_admin_key_passphrase"
+    BH_PROXY_USERNAME: "sari.bh_proxy_username"
 
 phases:
   build:

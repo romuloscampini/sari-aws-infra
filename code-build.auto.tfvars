@@ -1,1 +1,1 @@
-sari_version = "v0.7.0"
+sari_version = "v0.8.0"
