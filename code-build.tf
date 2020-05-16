@@ -99,6 +99,7 @@ data aws_iam_policy_document service_role_policy {
     sid    = "SARIManageResources"
     effect = "Allow"
     actions = [
+      "events:*",
       "iam:CreateRole",
       "iam:DeleteRole",
       "iam:DeleteRolePolicy",
@@ -258,4 +259,37 @@ resource aws_codebuild_webhook this {
       pattern = "master"
     }
   }
+}
+
+// CloudWatch StartBuild
+
+data aws_iam_policy_document assume_build_start {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["events.amazonaws.com"]
+    }
+  }
+}
+
+resource aws_iam_role build_start {
+  name               = "build-sari-start"
+  path               = "/service-role/"
+  assume_role_policy = data.aws_iam_policy_document.assume_build_start.json
+}
+
+data aws_iam_policy_document build_start {
+  statement {
+    effect    = "Allow"
+    actions   = ["codebuild:StartBuild"]
+    resources = [aws_codebuild_project.this.arn]
+  }
+}
+
+resource aws_iam_role_policy build_start {
+  role = aws_iam_role.build_start.name
+
+  policy = data.aws_iam_policy_document.build_start.json
 }
