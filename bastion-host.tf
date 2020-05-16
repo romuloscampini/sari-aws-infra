@@ -7,9 +7,8 @@ variable "hostnum" {
   type        = number
 }
 
-variable "trusted_src_ips" {
-  type    = list(string)
-  default = []
+variable "trusted_src_ip" {
+  type = string
 }
 
 resource aws_key_pair bh {
@@ -30,7 +29,8 @@ resource aws_ssm_parameter bh-pass {
 }
 
 resource aws_security_group bh {
-  name        = "SARI Bastion Host SG"
+  name = "SARI Bastion Host SG"
+  // FIXME: fix the description later since its modification implies recreating the SG
   description = "Allow SSH inbound traffic from trusted IPs"
   vpc_id      = aws_vpc.sari.id
 
@@ -42,17 +42,13 @@ resource aws_security_group bh {
     security_groups = [aws_security_group.cb.id]
   }
 
-  dynamic "ingress" {
-    for_each = toset(var.trusted_src_ips)
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
 
-    content {
-      description = "SSH"
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-
-      cidr_blocks = ["${ingress.value}/32"]
-    }
+    cidr_blocks = ["${var.trusted_src_ip}/32"]
   }
 
   egress {
