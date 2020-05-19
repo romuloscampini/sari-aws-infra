@@ -1,22 +1,34 @@
-variable bh_admin_key_passphrase {}
+variable bh_admin_key_passphrase {
+  type        = string
+  description = "The passphrase that decrypts the admin user's SSH private key."
+}
 
-variable ami_image_id {}
+variable ami_image_id {
+  type        = string
+  description = "The AMI image to create the Bastion Host instance, backed by the https://github.com/aetion/pkr-bastion-host project."
+}
 
 variable "bh_hostnum" {
-  description = "The host address offset to be added to the subnet netmask."
   type        = number
+  description = "The host address offset to be added to the subnet netmask. For a target CIDR block 10.12.41.0, the offset 123 will result in the IP 10.12.41.123."
 }
 
 variable "trusted_src_ips" {
-  type = list(string)
+  type        = list(string)
+  description = "The bastion host will accept SSH connections only from this IP external addresses. "
 }
 
 variable bh_admin_username {
-  type = string
-  default = "admin"
+  type        = string
+  description = "The Bastion Host user with administration rights (sudoer)."
+  default     = "admin"
 }
 
-variable bh_proxy_username {}
+variable bh_proxy_username {
+  type        = string
+  description = "The Bastion Host user whose ~/.ssh/authorized_keys is configured to allow SSH access from end-users. If null or empty, the company's name will be used."
+  default     = null
+}
 
 resource aws_key_pair bh {
   key_name   = "sari-bh-key"
@@ -38,7 +50,7 @@ resource aws_ssm_parameter bh-pass {
 resource aws_security_group bh {
   name        = "SARI Bastion Host SG"
   description = "Allow SSH inbound traffic from VPN Public IPs and CodeBuild SG"
-  vpc_id      = aws_vpc.sari.id
+  vpc_id      = data.aws_subnet.public.vpc_id
 
   ingress {
     description     = "SSH"
@@ -48,17 +60,13 @@ resource aws_security_group bh {
     security_groups = [aws_security_group.cb.id]
   }
 
-  dynamic "ingress" {
-    for_each = toset(var.trusted_src_ips)
+  ingress {
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
 
-    content {
-      description = "SSH"
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-
-      cidr_blocks = ["${ingress.value}/32"]
-    }
+    cidr_blocks = formatlist("%s/32", var.trusted_src_ips)
   }
 
   egress {
@@ -80,8 +88,8 @@ resource aws_instance bh {
   instance_type               = "t2.micro"
   vpc_security_group_ids      = [aws_security_group.bh.id]
   associate_public_ip_address = true
-  subnet_id                   = aws_subnet.public.id
-  private_ip                  = cidrhost(aws_subnet.public.cidr_block, var.bh_hostnum)
+  subnet_id                   = data.aws_subnet.public.id
+  private_ip                  = cidrhost(data.aws_subnet.public.cidr_block, var.bh_hostnum)
 
   tags = merge(local.base_tags, {
     Name = "sari-bastion-host"

@@ -20,6 +20,10 @@ resource aws_subnet public {
   }
 }
 
+data aws_subnet public {
+  id = aws_subnet.public.id
+}
+
 resource aws_route_table public {
   vpc_id = aws_vpc.sari.id
 
@@ -48,6 +52,10 @@ resource aws_subnet private1 {
   }
 }
 
+data aws_subnet private {
+  id = aws_subnet.private1.id
+}
+
 resource aws_subnet private2 {
   vpc_id            = aws_vpc.sari.id
   cidr_block        = "10.0.3.0/24"
@@ -71,7 +79,7 @@ resource aws_route_table private {
   vpc_id = aws_vpc.sari.id
 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat.id
   }
 

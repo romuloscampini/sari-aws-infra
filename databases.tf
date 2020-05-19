@@ -1,13 +1,18 @@
 variable mysql_major_version {
-  default = "5.7"
+  type        = string
+  description = "The MySQL major & minor version components (X.Y.z) for the RDS instances."
+  default     = "5.7"
 }
 
 variable mysql_patch_version {
-  default = "28"
+  type        = string
+  description = "The MySQL patch version (x.y.Z) for the RDS instances."
+  default     = "28"
 }
 
 variable db_names {
-  type = list(string)
+  type        = list(string)
+  description = "The databases names."
   default = [
     "blackwells",
     "whsmith"
@@ -90,7 +95,7 @@ resource aws_db_instance instance {
   engine                              = "mysql"
   engine_version                      = "${var.mysql_major_version}.${var.mysql_patch_version}"
   name                                = "db_${each.value}"
-  username                            = var.company
+  username                            = var.organization
   password                            = aws_ssm_parameter.pwd[each.value].value
   option_group_name                   = aws_db_option_group.mysql-audit.name
   allocated_storage                   = 20

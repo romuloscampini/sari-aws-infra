@@ -1,5 +1,5 @@
 resource aws_s3_bucket backend {
-  bucket = "backend.sari.${var.environment}.${var.company}.com"
+  bucket = "backend.sari.${var.environment}.${var.organization}.com"
   acl    = "private"
 
   versioning {

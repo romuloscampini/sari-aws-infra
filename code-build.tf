@@ -66,7 +66,7 @@ data aws_iam_policy_document service_role_policy {
     condition {
       test     = "StringEquals"
       variable = "ec2:Subnet"
-      values   = [aws_subnet.private1.arn]
+      values   = [data.aws_subnet.private.arn]
     }
     condition {
       test     = "StringEquals"
@@ -149,7 +149,7 @@ resource aws_iam_role_policy service_role_policy {
 
 resource aws_security_group cb {
   name   = "SARI CodeBuild"
-  vpc_id = aws_vpc.sari.id
+  vpc_id = data.aws_subnet.private.vpc_id
 
   egress {
     from_port   = 0
@@ -188,7 +188,7 @@ resource aws_codebuild_project this {
 
   source {
     type                = "GITHUB"
-    location            = "https://github.com/eliezio/sari-cfg-${var.environment}.git"
+    location            = "https://github.com/${coalesce(var.gh_user_or_org, var.organization)}/sari-cfg-${var.environment}.git"
     report_build_status = true
     git_clone_depth     = 1
 
@@ -205,10 +205,10 @@ env:
   variables:
     BH_ADMIN_USERNAME: "${var.bh_admin_username}"
     BH_HOSTNAME: "${aws_instance.bh.private_ip}"
-    BH_PROXY_USERNAME: "${var.bh_proxy_username}"
+    BH_PROXY_USERNAME: "${coalesce(var.bh_proxy_username, var.organization)}"
     OKTA_AWS_APP_IAM_USER: "${var.okta_aws_app_iam_user}"
     OKTA_AWS_APP_ID: "${data.okta_app_saml.aws_app.id}"
-    OKTA_ORG_NAME: "${var.okta_org_name}"
+    OKTA_ORG_NAME: "${coalesce(var.okta_org_name, var.organization)}"
     PULUMI_BACKEND_URL: "s3://${aws_s3_bucket.backend.bucket}"
 
   parameter-store:
@@ -235,10 +235,10 @@ EOT
   source_version = "master"
 
   vpc_config {
-    vpc_id = aws_vpc.sari.id
+    vpc_id = data.aws_subnet.private.vpc_id
 
     subnets = [
-      aws_subnet.private1.id
+      data.aws_subnet.private.id
     ]
 
     security_group_ids = [
