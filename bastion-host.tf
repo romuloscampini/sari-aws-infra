@@ -2,20 +2,24 @@ variable bh_admin_key_passphrase {}
 
 variable ami_image_id {}
 
-variable "hostnum" {
+variable "bh_hostnum" {
   description = "The host address offset to be added to the subnet netmask."
   type        = number
 }
 
-variable "trusted_src_ip" {
-  type = string
+variable "trusted_src_ips" {
+  type = list(string)
 }
 
-variable bh_admin_username {}
+variable bh_admin_username {
+  type = string
+  default = "admin"
+}
+
 variable bh_proxy_username {}
 
 resource aws_key_pair bh {
-  key_name   = "bh-key"
+  key_name   = "sari-bh-key"
   public_key = file("admin_id_rsa.pub")
 }
 
@@ -31,28 +35,9 @@ resource aws_ssm_parameter bh-pass {
   value = var.bh_admin_key_passphrase
 }
 
-resource aws_ssm_parameter bh-hostname {
-  name  = "sari.bh_hostname"
-  type  = "String"
-  value = aws_instance.bh.private_ip
-}
-
-resource aws_ssm_parameter bh-admin-username {
-  name  = "sari.bh_admin_username"
-  type  = "String"
-  value = var.bh_admin_username
-}
-
-resource aws_ssm_parameter bh-proxy-username {
-  name  = "sari.bh_proxy_username"
-  type  = "String"
-  value = var.bh_proxy_username
-}
-
 resource aws_security_group bh {
-  name = "SARI Bastion Host SG"
-  // FIXME: fix the description later since its modification implies recreating the SG
-  description = "Allow SSH inbound traffic from trusted IPs"
+  name        = "SARI Bastion Host SG"
+  description = "Allow SSH inbound traffic from VPN Public IPs and CodeBuild SG"
   vpc_id      = aws_vpc.sari.id
 
   ingress {
@@ -63,13 +48,17 @@ resource aws_security_group bh {
     security_groups = [aws_security_group.cb.id]
   }
 
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
+  dynamic "ingress" {
+    for_each = toset(var.trusted_src_ips)
 
-    cidr_blocks = ["${var.trusted_src_ip}/32"]
+    content {
+      description = "SSH"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+
+      cidr_blocks = ["${ingress.value}/32"]
+    }
   }
 
   egress {
@@ -92,7 +81,7 @@ resource aws_instance bh {
   vpc_security_group_ids      = [aws_security_group.bh.id]
   associate_public_ip_address = true
   subnet_id                   = aws_subnet.public.id
-  private_ip                  = cidrhost(aws_subnet.public.cidr_block, var.hostnum)
+  private_ip                  = cidrhost(aws_subnet.public.cidr_block, var.bh_hostnum)
 
   tags = merge(local.base_tags, {
     Name = "sari-bastion-host"

@@ -148,9 +148,8 @@ resource aws_iam_role_policy service_role_policy {
 }
 
 resource aws_security_group cb {
-  name        = "SARI CodeBuild"
-  description = "Allow SSH & DB inbound traffic"
-  vpc_id      = aws_vpc.sari.id
+  name   = "SARI CodeBuild"
+  vpc_id = aws_vpc.sari.id
 
   egress {
     from_port   = 0
@@ -189,7 +188,7 @@ resource aws_codebuild_project this {
 
   source {
     type                = "GITHUB"
-    location            = "https://github.com/eliezio/sari-${var.environment}.git"
+    location            = "https://github.com/eliezio/sari-cfg-${var.environment}.git"
     report_build_status = true
     git_clone_depth     = 1
 
@@ -204,15 +203,19 @@ run-as: pulumi
 
 env:
   variables:
+    BH_ADMIN_USERNAME: "${var.bh_admin_username}"
+    BH_HOSTNAME: "${aws_instance.bh.private_ip}"
+    BH_PROXY_USERNAME: "${var.bh_proxy_username}"
+    OKTA_AWS_APP_IAM_USER: "${var.okta_aws_app_iam_user}"
+    OKTA_AWS_APP_ID: "${data.okta_app_saml.aws_app.id}"
+    OKTA_ORG_NAME: "${var.okta_org_name}"
     PULUMI_BACKEND_URL: "s3://${aws_s3_bucket.backend.bucket}"
+
   parameter-store:
-    PULUMI_CONFIG_PASSPHRASE: "sari.pulumi_config_passphrase"
-    OKTA_API_TOKEN: "sari.okta_api_token"
-    BH_HOSTNAME: "sari.bh_hostname"
-    BH_ADMIN_USERNAME: "sari.bh_admin_username"
-    BH_ADMIN_PRIVATE_KEY: "sari.bh_admin_private_key"
     BH_ADMIN_KEY_PASSPHRASE: "sari.bh_admin_key_passphrase"
-    BH_PROXY_USERNAME: "sari.bh_proxy_username"
+    BH_ADMIN_PRIVATE_KEY: "sari.bh_admin_private_key"
+    OKTA_API_TOKEN: "sari.okta_api_token"
+    PULUMI_CONFIG_PASSPHRASE: "sari.pulumi_config_passphrase"
 
 phases:
   build:
@@ -223,6 +226,8 @@ phases:
       - pulumi version
       - pulumi --non-interactive login --cloud-url $PULUMI_BACKEND_URL
       - pulumi --non-interactive stack select this --create
+      - pulumi --non-interactive stack export | jq '[.deployment.resources[]? | .urn]' > resources.json
+      - eval $(./run-proxy.sh)
       - pulumi --logtostderr -v=2 --non-interactive up --yes --skip-preview
 EOT
   }
@@ -242,7 +247,7 @@ EOT
   }
 
   tags = merge(local.base_tags, {
-    Name = "sari-code-build"
+    Name = "sari-build"
   })
 }
 
