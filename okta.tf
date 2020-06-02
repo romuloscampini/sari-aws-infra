@@ -28,3 +28,13 @@ resource aws_ssm_parameter okta {
 data okta_app_saml aws_app {
   label = var.okta_aws_app_label
 }
+
+data okta_app_metadata_saml aws_app {
+  app_id = data.okta_app_saml.aws_app.id
+  key_id = data.okta_app_saml.aws_app.key_id
+}
+
+resource "aws_iam_saml_provider" okta {
+  name                   = "Okta"
+  saml_metadata_document = data.okta_app_metadata_saml.aws_app.metadata
+}
