@@ -214,6 +214,7 @@ env:
     OKTA_AWS_APP_ID: "${data.okta_app_saml.aws_app.id}"
     OKTA_ORG_NAME: "${coalesce(var.okta_org_name, var.organization)}"
     PULUMI_BACKEND_URL: "s3://${aws_s3_bucket.backend.bucket}"
+    PULUMI_STACK_NAME: "sari-${var.environment}"
 
   parameter-store:
     BH_ADMIN_KEY_PASSPHRASE: "sari.bh_admin_key_passphrase"
@@ -229,8 +230,7 @@ phases:
       - export CI=$CODEBUILD_CI
       - pulumi version
       - pulumi --non-interactive login --cloud-url $PULUMI_BACKEND_URL
-      - pulumi --non-interactive stack select this --create
-      - pulumi --non-interactive stack export | jq '[.deployment.resources[]? | .urn]' > resources.json
+      - pulumi --non-interactive stack select $PULUMI_STACK_NAME --create
       - eval $(./run-proxy.sh)
       - pulumi --logtostderr -v=2 --non-interactive up --yes --skip-preview
 EOT
