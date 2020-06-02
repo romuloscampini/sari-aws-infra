@@ -74,6 +74,14 @@ resource aws_security_group rds {
     security_groups = [aws_security_group.bh.id]
   }
 
+  ingress {
+    description = "sg inbound to itself - glue requirement"
+    from_port   = 0
+    to_port     = 0
+    protocol    = -1
+    self        = true
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
