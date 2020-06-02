@@ -14,9 +14,9 @@ variable okta_aws_app_label {
   description = "The full name of the Okta AWS Application."
 }
 
-variable okta_aws_app_iam_user {
+variable okta_aws_app_iam_idp {
   type        = string
-  description = "The AWS username used by the Okta AWS application to fetch IAM roles."
+  description = "The IAM IdP name that references Okta as a SAML 2.0 Identity Provider."
 }
 
 resource aws_ssm_parameter okta {

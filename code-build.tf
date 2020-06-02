@@ -206,7 +206,7 @@ env:
     BH_ADMIN_USERNAME: "${var.bh_admin_username}"
     BH_HOSTNAME: "${aws_instance.bh.private_ip}"
     BH_PROXY_USERNAME: "${coalesce(var.bh_proxy_username, var.organization)}"
-    OKTA_AWS_APP_IAM_USER: "${var.okta_aws_app_iam_user}"
+    OKTA_AWS_APP_IAM_IDP: "${var.okta_aws_app_iam_idp}"
     OKTA_AWS_APP_ID: "${data.okta_app_saml.aws_app.id}"
     OKTA_ORG_NAME: "${coalesce(var.okta_org_name, var.organization)}"
     PULUMI_BACKEND_URL: "s3://${aws_s3_bucket.backend.bucket}"
