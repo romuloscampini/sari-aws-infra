@@ -96,7 +96,7 @@ data aws_iam_policy_document service_role_policy {
   }
 
   statement {
-    sid    = "SARIManageResources"
+    sid    = "SARIManagedResources"
     effect = "Allow"
     actions = [
       "events:*",
