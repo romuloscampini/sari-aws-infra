@@ -209,7 +209,9 @@ env:
     OKTA_AWS_APP_ID: "${data.okta_app_saml.aws_app.id}"
     OKTA_ORG_NAME: "${coalesce(var.okta_org_name, var.organization)}"
     PULUMI_BACKEND_URL: "s3://${aws_s3_bucket.backend.bucket}"
+    PULUMI_SKIP_UPDATE_CHECK: "true"
     PULUMI_STACK_NAME: "sari-${var.environment}"
+    SARI_IAM_TRIGGER_ROLE_NAME: "${aws_iam_role.build_start.name}"
 
   parameter-store:
     BH_ADMIN_KEY_PASSPHRASE: "sari.bh_admin_key_passphrase"
@@ -221,7 +223,7 @@ phases:
   build:
     commands:
       - cd $HOME
-      - export CONFIG=$CODEBUILD_SRC_DIR
+      - export SARI_CONFIG=$CODEBUILD_SRC_DIR
       - export CI=$CODEBUILD_CI
       - pulumi version
       - pulumi --non-interactive login --cloud-url $PULUMI_BACKEND_URL
