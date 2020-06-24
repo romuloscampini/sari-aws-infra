@@ -33,4 +33,5 @@ variable gh_user_or_org {
 variable gh_token {
   type        = string
   description = "The OAuth token that allows CodeBuild to access the GitHub project's account."
+  default     = null
 }

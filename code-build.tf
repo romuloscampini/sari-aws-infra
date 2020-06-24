@@ -1,9 +1,3 @@
-resource aws_codebuild_source_credential gh {
-  auth_type   = "PERSONAL_ACCESS_TOKEN"
-  server_type = "GITHUB"
-  token       = var.gh_token
-}
-
 data aws_iam_policy_document service_role {
   statement {
     effect  = "Allow"
@@ -255,7 +249,14 @@ EOT
   })
 }
 
-// GitHub
+// GitHub Integration
+
+resource aws_codebuild_source_credential gh {
+  count       = var.gh_token != null ? 1 : 0
+  auth_type   = "PERSONAL_ACCESS_TOKEN"
+  server_type = "GITHUB"
+  token       = var.gh_token
+}
 
 resource aws_codebuild_webhook this {
   project_name = aws_codebuild_project.this.name
