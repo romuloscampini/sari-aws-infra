@@ -74,7 +74,7 @@ data aws_iam_policy_document service_role_policy {
     actions = [
       "ssm:GetParameters", // Access PARAMETER_STORE-based variables
     ]
-    resources = ["arn:aws:ssm:${var.aws_region}:${local.account_id}:parameter/*"]
+    resources = formatlist("arn:aws:ssm:%s:${local.account_id}:parameter/*", var.aws_regions)
   }
 
   statement {
@@ -121,7 +121,7 @@ data aws_iam_policy_document service_role_policy {
     actions = [
       "ssm:GetParameter"
     ]
-    resources = ["arn:aws:ssm:${var.aws_region}:${local.account_id}:parameter/*"]
+    resources = formatlist("arn:aws:ssm:%s:${local.account_id}:parameter/*", var.aws_regions)
   }
 
   dynamic "statement" {

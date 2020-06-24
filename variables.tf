@@ -13,6 +13,11 @@ variable aws_region {
   description = "The primary AWS region name."
 }
 
+variable aws_regions {
+  type        = list(string)
+  description = "All target AWS regions."
+}
+
 variable kms_decrypt_keys {
   type        = list(string)
   description = "List here all KMS keys required to decrypt the SSM-based RDS passwords."
