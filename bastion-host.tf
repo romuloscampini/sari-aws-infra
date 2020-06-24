@@ -77,7 +77,7 @@ resource aws_security_group bh {
   }
 
   tags = {
-    Name = "sari-sg"
+    Name = "sari-bastion-host"
   }
 }
 

@@ -162,7 +162,7 @@ resource aws_security_group cb {
 }
 
 resource aws_codebuild_project this {
-  name          = "build-sari"
+  name          = "run-sari"
   description   = "Secure Access to RDS Instances - ${upper(var.environment)} Build"
   build_timeout = "15"
   service_role  = aws_iam_role.service_role.arn
@@ -245,7 +245,7 @@ EOT
   }
 
   tags = merge(local.base_tags, {
-    Name = "sari-build"
+    Name = "run-sari"
   })
 }
 
@@ -288,13 +288,14 @@ data aws_iam_policy_document assume_build_start {
 }
 
 resource aws_iam_role build_start {
-  name               = "build-sari-start"
+  name               = "SARITriggerRun"
   path               = "/service-role/"
   assume_role_policy = data.aws_iam_policy_document.assume_build_start.json
 }
 
 data aws_iam_policy_document build_start {
   statement {
+    sid       = "1"
     effect    = "Allow"
     actions   = ["codebuild:StartBuild"]
     resources = [aws_codebuild_project.this.arn]

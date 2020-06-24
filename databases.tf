@@ -90,7 +90,7 @@ resource aws_security_group rds {
   }
 
   tags = {
-    Name = "sari-sg"
+    Name = "sari-rds"
   }
 }
 
