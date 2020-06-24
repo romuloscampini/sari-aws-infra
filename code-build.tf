@@ -1,4 +1,4 @@
-data aws_iam_policy_document service_role {
+data aws_iam_policy_document cb_assume_role {
   statement {
     effect  = "Allow"
     actions = ["sts:AssumeRole"]
@@ -9,13 +9,13 @@ data aws_iam_policy_document service_role {
   }
 }
 
-resource aws_iam_role service_role {
-  name = "codebuild-build-sari-service-role"
+resource aws_iam_role cb {
+  name = "SARICodeBuildServiceRole"
 
-  assume_role_policy = data.aws_iam_policy_document.service_role.json
+  assume_role_policy = data.aws_iam_policy_document.cb_assume_role.json
 }
 
-data aws_iam_policy_document service_role_policy {
+data aws_iam_policy_document cb_svc {
   statement {
     sid    = "CloudWatchLogsPolicy"
     effect = "Allow"
@@ -88,6 +88,9 @@ data aws_iam_policy_document service_role_policy {
       "${aws_s3_bucket.backend.arn}/*"
     ]
   }
+}
+
+data aws_iam_policy_document cb_app {
 
   statement {
     sid    = "SARIManagedResources"
@@ -149,10 +152,18 @@ data aws_iam_policy_document service_role_policy {
   }
 }
 
-resource aws_iam_role_policy service_role_policy {
-  role = aws_iam_role.service_role.name
+resource aws_iam_role_policy cb_svc {
+  name = "SARICodeBuildService"
+  role = aws_iam_role.cb.name
 
-  policy = data.aws_iam_policy_document.service_role_policy.json
+  policy = data.aws_iam_policy_document.cb_svc.json
+}
+
+resource aws_iam_role_policy cb_app {
+  name = "SARICodeBuildApplication"
+  role = aws_iam_role.cb.name
+
+  policy = data.aws_iam_policy_document.cb_app.json
 }
 
 resource aws_security_group cb {
@@ -175,7 +186,7 @@ resource aws_codebuild_project this {
   name          = "run-sari"
   description   = "Secure Access to RDS Instances - ${upper(var.environment)} Build"
   build_timeout = "15"
-  service_role  = aws_iam_role.service_role.arn
+  service_role  = aws_iam_role.cb.arn
   badge_enabled = true
 
   artifacts {
@@ -269,7 +280,7 @@ resource aws_codebuild_source_credential gh {
   token       = var.gh_token
 }
 
-resource aws_codebuild_webhook this {
+resource aws_codebuild_webhook gh {
   project_name = aws_codebuild_project.this.name
 
   filter_group {
