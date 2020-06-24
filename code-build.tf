@@ -125,6 +125,15 @@ data aws_iam_policy_document service_role_policy {
     resources = formatlist("arn:aws:ssm:%s:${local.account_id}:parameter/*", var.aws_regions)
   }
 
+  statement {
+    sid    = "SARIEncryptGluePasswords"
+    effect = "Allow"
+    actions = [
+      "kms:Encrypt"
+    ]
+    resources = [aws_kms_key.glue_passwords.arn]
+  }
+
   dynamic "statement" {
     for_each = var.kms_decrypt_keys
     content {

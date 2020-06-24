@@ -21,3 +21,12 @@ resource aws_iam_role_policy_attachment glue_service_role {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"
 }
 
+resource aws_kms_key glue_passwords {
+  description = "Protects Glue Connections' passwords"
+  tags        = local.base_tags
+}
+
+resource aws_kms_alias glue_passwords {
+  name          = "alias/sari/glue-connections"
+  target_key_id = aws_kms_key.glue_passwords.id
+}
