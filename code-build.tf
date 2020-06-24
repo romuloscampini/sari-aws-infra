@@ -102,6 +102,7 @@ data aws_iam_policy_document service_role_policy {
       "iam:ListInstanceProfilesForRole",
       "iam:PutRolePolicy",
       "iam:TagRole",
+      "iam:UntagRole",
       "iam:UpdateAssumeRolePolicy",
       "glue:CreateConnection",
       "glue:DeleteConnection",
