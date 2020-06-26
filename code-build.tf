@@ -100,6 +100,7 @@ data aws_iam_policy_document cb_app {
       "iam:CreateRole",
       "iam:DeleteRole",
       "iam:DeleteRolePolicy",
+      "iam:GetPolicy",
       "iam:GetRole",
       "iam:GetRolePolicy",
       "iam:ListInstanceProfilesForRole",
