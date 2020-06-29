@@ -97,13 +97,16 @@ data aws_iam_policy_document cb_app {
     effect = "Allow"
     actions = [
       "events:*",
+      "iam:CreatePolicyVersion",
       "iam:CreateRole",
       "iam:DeleteRole",
       "iam:DeleteRolePolicy",
       "iam:GetPolicy",
+      "iam:GetPolicyVersion",
       "iam:GetRole",
       "iam:GetRolePolicy",
       "iam:ListInstanceProfilesForRole",
+      "iam:ListPolicyVersions",
       "iam:PutRolePolicy",
       "iam:TagRole",
       "iam:UntagRole",
